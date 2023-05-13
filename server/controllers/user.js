@@ -1,7 +1,6 @@
-import bcrypt from "bcrypt.js";
-import jwt from "jsonwebtoken";
-import User from "../models/user";
-
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import User from "../models/user.js"
 export const signin = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -10,25 +9,18 @@ with the provided email, it sends a response with a 404 status code and a messag
 exist". */
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      res.status(404).json({ message: "user doesntt exist" });
+      res.status(404).json({ message: "user doesnt exist" });
     }
     /* This code is checking if the password provided by the user matches the hashed password stored in the
 database for the user with the provided email. It uses the `bcrypt.compare()` method to compare the
 two passwords. If the passwords do not match, it sends a response with a 400 status code and a
 message "invalid credentials". */
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
-    if (!isPasswordCorrect) {
-      res.status(400).json({ message: "invalid credentials" });
-    }
+    const isPasswordCorrect = await bcrypt.compare(password,existingUser.password);
+    if (!isPasswordCorrect) 
+      return res.status(400).json({ message: "invalid credentials" });
+  
 
-    const token = jwt.sign(
-      { email: existingUser.email, id: existingUser._id },
-      "test",
-      { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ email: existingUser.email, id: existingUser._id },"test",{ expiresIn: "1h" });
     res.status(200).json({ result: existingUser, token });
   } catch (error) {
     console.log(error);

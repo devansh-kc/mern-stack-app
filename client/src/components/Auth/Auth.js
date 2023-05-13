@@ -17,8 +17,7 @@ import {
 } from "@material-ui/core";
 import { useDispatch } from "react-redux";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import { signin, signup } from "../../actions/auth";
-
+import { signin, signup } from "../../actions/auth.js";
 const initialState = {
   firstName: "",
   lastName: "",
@@ -53,6 +52,7 @@ operator (`!`). This function is passed as a prop to the `Input` component for t
 so that the user can toggle the visibility of their password. */
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData);
     if (isSignup) {
       dispatch(signup(formData, history));
     } else {
@@ -60,6 +60,7 @@ so that the user can toggle the visibility of their password. */
     }
   };
   const handleChange = (e) => {
+    
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
   const handleShowPassword = () => {
@@ -67,7 +68,7 @@ so that the user can toggle the visibility of their password. */
   };
   const switchMode = () => {
     setIsSignup((prevIsSignup) => !prevIsSignup);
-    handleShowPassword(false);
+    setShowPassword(false);
   };
   const googleSuccess = async (res) => {
     /* `const result = res?.profileObj;` is using the optional chaining operator (`?.`) to access the
@@ -95,7 +96,7 @@ or `undefined`, the `profileObj` property will be assigned to the `result` varia
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
         </Avatar>
-        <Typography varient="h5">{isSignup ? "Sign Up" : "Sign In"}</Typography>
+        <Typography variant="h5">{isSignup ? "Sign Up" : "Sign In"}</Typography>
         <form className={classes.form} onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {isSignup && (
@@ -143,7 +144,7 @@ or `undefined`, the `profileObj` property will be assigned to the `result` varia
           <Button
             type="submit"
             fullWidth
-            varient="contained"
+            variant="contained"
             color="primary"
             className={classes.submit}
           >

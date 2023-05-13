@@ -3,7 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import Express from "express";
 import postRoutes from "./routes/posts.js";
-import userRoutes from "./routes/users.js";
+import userRoutes from "./routes/users.js"
 import dotenv from "dotenv";
 const app = Express();
 dotenv.config();
@@ -27,7 +27,7 @@ mongoose
   })
   .then(() =>
     app.listen(PORT, () =>
-      console.log(`port sucessfully connected tto ${PORT}`)
+      console.log(`port sucessfully connected to ${PORT}`)
     )
   )
   .catch((error) => console.log(error.message));

@@ -6,8 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { createPost, updatePost } from "../../actions/posts.js";
 
 const Form = ({ currentId, setCurrentId }) => {
+  const user =JSON.parse(localStorage.getItem("profile"))
   const [postData, setPostData] = useState({
-    creator: "",
     title: "",
     message: "",
     tags: "",
@@ -29,19 +29,24 @@ truthy, it will find the post with the matching `_id` property and assign it to 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(createPost(postData));
-    if (currentId) {
-      dispatch(updatePost(currentId, postData));
+    if (currentId===0) {
+      dispatch(createPost({...postData,name:user?.result?.name}));
     } else {
-      dispatch(createPost(post));
+      dispatch(updatePost(currentId,{...postData,name:user?.result?.name}));
     }
     clear();
   };
 
+  if (!user?.result?.name){
+    return(
+      <Paper className={classes.paper}>
+        <Typography variant="h6" align="center"> please sign in to creat your own memories and like other memories</Typography>
+      </Paper>
+    )
+  }
   const clear = () => {
     setCurrentId(null);
     setPostData({
-      creator: "",
       title: "",
       message: "",
       tags: "",
@@ -50,10 +55,6 @@ truthy, it will find the post with the matching `_id` property and assign it to 
   };
 
   return (
-    /* This is a React functional component that renders a form with a paper background. The form has a
-text field for the creator's name, which updates the `postData` state when the user types in it. The
-`handleSubmit` function is called when the form is submitted, but it is not implemented yet. The
-`useStyles` hook is used to apply custom styles to the components. */
     <Paper className={classes.paper}>
       <form
         autoComplete="off"
@@ -64,16 +65,6 @@ text field for the creator's name, which updates the `postData` state when the u
         <Typography variant="h6">
           {currentId ? "Editing" : "creating"} a memory
         </Typography>
-        <TextField
-          name="creator"
-          variant="outlined"
-          label="Creator"
-          fullWidth
-          value={postData.creator}
-          onChange={(e) =>
-            setPostData({ ...postData, creator: e.target.value })
-          }
-        />
         <TextField
           name="title"
           variant="outlined"

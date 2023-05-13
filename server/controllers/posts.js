@@ -22,6 +22,18 @@ export const getPosts = async (req, res) => {
     res.status(404).json({ message: error.message });
   }
 };
+export const getPost = async (req, res) => { 
+  const { id } = req.params;
+
+  try {
+      const post = await PostMessage.findById(id);
+      
+      res.status(200).json(post);
+  } catch (error) {
+      res.status(404).json({ message: error.message });
+  }
+}
+
 /**
  * This function creates a new post by saving the request body as a new PostMessage and returns the new
  * post or an error message.
@@ -35,16 +47,18 @@ export const getPosts = async (req, res) => {
  */
 export const createPost = async (req, res) => {
   const post = req.body;
-  console.log("CREATE");
-  const newPost = new PostMessage(post);
+
+  const newPostMessage = new PostMessage({ ...post, creator: req.userId, createdAt: new Date().toISOString() })
 
   try {
-    await newPost.save();
-    res.status(201).json(newPost);
+      await newPostMessage.save();
+
+      res.status(201).json(newPostMessage );
   } catch (error) {
-    res.status(409).json({ message: error });
+      res.status(409).json({ message: error.message });
   }
 };
+
 /**
  * This function updates a post with a given ID and returns the updated post.
  * @param req - The request object represents the HTTP request that was sent by the client to the
@@ -57,13 +71,8 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   const { id: _id } = req.params;
   const post = req.body;
-  if (!mongoose.Types.ObjectId.isValid(_id))
-    return res.status(404).send("no post with that id ");
-  const updatedPost = await PostMessage.findByIdAndUpdate(
-    _id,
-    { ...post, _id },
-    { new: true }
-  );
+  if (!mongoose.Types.ObjectId.isValid(_id)) return res.status(404).send("no post with that id ");
+  const updatedPost = await PostMessage.findByIdAndUpdate(_id,{ ...post, _id },{ new: true });
 
   console.log("UPDATE");
   res.json(updatedPost);
@@ -92,14 +101,32 @@ export const deletePost = async (req, res) => {
 
 export const likePost = async (req, res) => {
   const { id } = req.params;
+  if (!req.userId) return res.json({message:"Unauthenticated"})
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(404).send("no post with that id ");
   const post = await PostMessage.findById(id);
-  const updatedPost = await PostMessage.findByIdAndUpdate(
-    id,
-    { likeCount: post.likeCount + 1 },
-    { new: true }
-  );
+  const index=  post.likes.findIndex((id)=>id===String(req.userId))
+
+
+
+  if (index ===-1){
+    /* `post.likes.push(req.userId)` is adding the `req.userId` to the `likes` array of the post. This
+    is used to indicate that the user with the `req.userId` has liked the post. */
+    post.likes.push(req.userId)
+
+  }else{
+    /* `(id)=>id !==String(req.userId)` is a callback function used with the `filter()` method. It
+    checks if the `id` in the `post.likes` array is not equal to the `req.userId` (which is
+    converted to a string using `String()`). If the condition is true, the `id` is kept in the
+    array, otherwise, it is filtered out. This is used to remove the `req.userId` from the
+    `post.likes` array if it already exists, or add it if it doesn't. */
+    post.likes = post.likes.filter((id)=>id !==String(req.userId))
+    
+  }
+  const updatedPost = await PostMessage.findByIdAndUpdate(id,post,{ new: true });
   res.json(updatedPost);
   console.log(`like ${updatedPost.likeCount}`);
 };
+
+
+
